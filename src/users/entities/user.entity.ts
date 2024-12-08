@@ -11,6 +11,9 @@ export class User extends AbstractEntity{
 
     @Prop()
     password: string;
+
+    @Prop()
+    username: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

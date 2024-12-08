@@ -1,18 +1,27 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UsersRepository } from './users.repository';
+import { S3Service } from 'src/common/s3/s3.service';
+import { USER_BUCKET, USER_IMG_FILE_EXTENSION } from './users.constants';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository){}
+  constructor(private readonly usersRepository: UsersRepository, private readonly s3Service: S3Service){}
 
   async create(createUserInput: CreateUserInput) {
-    return this.usersRepository.create({
-      ...createUserInput,
-      password: await this.hashPassword(createUserInput.password),
-    });
+    try {
+      return await this.usersRepository.create({
+        ...createUserInput,
+        password: await this.hashPassword(createUserInput.password),
+      });
+    } catch (error) {
+      if(error.message.includes('E11000')){
+        throw new UnprocessableEntityException('Email already exist.')
+      }
+      throw error
+    }
   }
 
   async findAll() {
@@ -37,6 +46,15 @@ export class UsersService {
 
   async remove(_id: string) {
     return this.usersRepository.findOneAndDelete({ _id });
+  }
+
+  async uploadImage(file: Buffer, userId: string){
+    await this.s3Service.upload({
+      bucket: USER_BUCKET,
+      key: `${userId}.${USER_IMG_FILE_EXTENSION}`,
+      file,
+    })
+    
   }
 
   private async hashPassword(password: string){

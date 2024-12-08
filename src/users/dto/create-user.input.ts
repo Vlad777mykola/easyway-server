@@ -10,4 +10,7 @@ export class CreateUserInput {
   @Field()
   @IsStrongPassword()
   password: string;
+
+  @Field()
+  username: string;
 }

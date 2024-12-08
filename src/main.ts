@@ -8,11 +8,10 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {bufferLogs: true});
 
-  // app.enableCors({
-  //   origin: 'http://localhost:5173', // Vite dev server URL
-  //   methods: 'GET,POST,PUT,DELETE', // Allowed methods
-  //   allowedHeaders: 'Content-Type, Authorization', // Allowed headers
-  // });
+  app.enableCors({
+    origin: 'http://localhost:5173', // Vite dev server URL
+    credentials: true, // Allow cookies to be sent
+  });
   app.useGlobalPipes(new ValidationPipe());
   app.useLogger(app.get(Logger));
   app.use(cookieParser());
