@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {bufferLogs: true});
 
   app.enableCors({
-    origin: 'http://localhost:5173', // Vite dev server URL
+    origin:  ['http://localhost:5173', 'https://easyway-sepia.vercel.app'], // Vite dev server URL
     credentials: true, // Allow cookies to be sent
   });
   app.useGlobalPipes(new ValidationPipe());
